@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modul Pembelajaran Interaktif</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body id="app-body" class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-500">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-black/20 border-b border-white/10 px-4 lg:px-8 py-3 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap text-2xl text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg sm:text-xl tracking-tight leading-none text-white drop-shadow">EduColor</h1>
+                    <p class="text-xs text-white/70 font-medium">Modul Pembelajaran Interaktif</p>
+                </div>
+            </div>
+
+            <!-- Active Color Hex Display & Controls -->
+            <div class="flex items-center gap-3 ml-auto sm:ml-0">
+                <!-- Live Hex Badge -->
+                <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/40 backdrop-blur-lg border border-white/20 shadow-lg" title="Kode Warna Background Saat Ini">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-xs text-white/80 font-medium">Hex:</span>
+                    <span id="hex-code-display" class="code-font text-xs sm:text-sm font-semibold text-yellow-300">#0F172A</span>
+                    <button onclick="copyHexCode(event)" class="ml-1 text-white/60 hover:text-white text-xs transition" title="Salin Kode Hex">
+                        <i id="copy-icon" class="fa-regular fa-copy"></i>
+                    </button>
+                </div>
+
+                <!-- Manual Trigger Button -->
+                <button onclick="changeBackgroundColor(event)" class="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 transition-all duration-200 text-xs sm:text-sm font-semibold border border-white/20 flex items-center gap-2 shadow-md hover:shadow-lg">
+                    <i class="fa-solid fa-palette text-pink-300"></i>
+                    <span class="hidden sm:inline">Ubah Warna</span>
+                </button>
+
+                <!-- Reset Color Button -->
+                <button onclick="resetBackgroundColor(event)" class="px-3.5 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 active:scale-95 text-red-200 border border-red-400/30 transition duration-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5" title="Reset Ke Warna Default">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span class="hidden md:inline">Reset</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Sidebar: Daftar Modul (Interactive Cards) -->
+        <section class="lg:col-span-4 space-y-3">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xs uppercase font-bold tracking-wider text-white/70 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i>
+                    Daftar Modul Belajar
+                </h2>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-white/10 border border-white/10 text-white/80" id="module-count">4 Modul</span>
+            </div>
+
+            <!-- List of Module Cards -->
+            <div id="module-list" class="space-y-3">
+                <!-- Cards will be populated by JavaScript -->
+            </div>
+
+            <!-- Tip Box -->
+            <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 shadow-sm text-xs text-white/80 space-y-2">
+                <p class="font-bold flex items-center gap-2 text-yellow-300">
+                    <i class="fa-solid fa-lightbulb"></i> Tips Interaktif
+                </p>
+                <p>Klik di area kosong layar atau pada materi modul untuk langsung mengganti warna latar belakang secara acak dengan nuansa dinamis!</p>
+            </div>
+        </section>
+
+        <!-- Main Display Area: Detail Content Modul -->
+        <section class="lg:col-span-8 flex flex-col h-full">
+            <div id="content-card" class="bg-black/30 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl flex-1 flex flex-col transition-all duration-300">
+
+                <!-- Content Header -->
+                <div class="border-b border-white/15 pb-5 mb-6 flex flex-wrap justify-between items-start gap-4">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 mb-3" id="module-category">
+                            <i class="fa-solid fa-code"></i> Frontend Web Development
+                        </div>
+                        <h2 id="module-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Memuat Modul...
+                        </h2>
+                    </div>
+
+                    <!-- Navigation Next/Prev -->
+                    <div class="flex items-center gap-2">
+                        <button id="prev-btn" onclick="navigateModule(-1, event)" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/20 transition">
+                            <i class="fa-solid fa-chevron-left text-sm"></i>
+                        </button>
+                        <span id="module-index-indicator" class="text-xs code-font font-bold px-2 text-white/80">1/4</span>
+                        <button id="next-btn" onclick="navigateModule(1, event)" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/20 transition">
+                            <i class="fa-solid fa-chevron-right text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main Reading Body -->
+                <div id="module-body" class="space-y-4 text-slate-100 text-sm sm:text-base leading-relaxed flex-1">
+                    <!-- Dynamic Body Content -->
+                </div>
+
+                <!-- Interactive Mini Practice Box -->
+                <div class="mt-8 pt-6 border-t border-white/15">
+                    <div class="bg-white/5 rounded-2xl p-4 sm:p-5 border border-white/10 space-y-3">
+                        <h4 class="text-xs sm:text-sm font-bold uppercase tracking-wide text-yellow-300 flex items-center gap-2">
+                            <i class="fa-solid fa-terminal"></i> Rangkuman Kunci Modul Ini
+                        </h4>
+                        <p id="module-summary" class="text-xs sm:text-sm text-white/80 italic">
+                            -
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 translate-y-20 opacity-0 transition-all duration-300 bg-black/80 backdrop-blur-lg border border-white/20 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 pointer-events-none z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-xs sm:text-sm font-medium">Notifikasi</span>
+    </div>
+
+    <script>
+        // Data Modul Pembelajaran
+        const modulesData = [
+            {
+                id: 1,
+                title: "Modul 1: Pengantar HTML5",
+                category: "Dasar Web",
+                icon: "fa-brands fa-html5",
+                color: "from-orange-500/20 to-amber-500/20",
+                description: "Pelajari struktur dasar halaman web menggunakan HTML5 secara terstruktur.",
+                content: `
+                    <p class="text-base sm:text-lg font-medium text-white/90">
+                        <strong>HTML (HyperText Markup Language)</strong> adalah bahasa standar mendasar yang digunakan untuk membuat dan menyusun struktur elemen pada halaman web.
+                    </p>
+                    <div class="bg-black/40 p-4 rounded-xl border border-white/10 code-font text-xs sm:text-sm overflow-x-auto text-emerald-300">
+                        &lt;!DOCTYPE html&gt;<br>
+                        &lt;html&gt;<br>
+                        &nbsp;&nbsp;&lt;head&gt;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;Halaman Pertama Saya&lt;/title&gt;<br>
+                        &nbsp;&nbsp;&lt;/head&gt;<br>
+                        &nbsp;&nbsp;&lt;body&gt;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;Halo Dunia!&lt;/h1&gt;<br>
+                        &nbsp;&nbsp;&lt;/body&gt;<br>
+                        &lt;/html&gt;
+                    </div>
+                    <ul class="list-disc list-inside space-y-2 text-white/80 pl-1">
+                        <li><strong>Element & Tag:</strong> Komponen dasar pembentuk HTML (seperti &lt;p&gt;, &lt;h1&gt;, &lt;div&gt;).</li>
+                        <li><strong>Attributes:</strong> Memberikan informasi tambahan pada elemen HTML (seperti href, src, id).</li>
+                        <li><strong>Semantik:</strong> Penggunaan tag seperti &lt;header&gt;, &lt;main&gt;, &lt;footer&gt; untuk aksesibilitas yang baik.</li>
+                    </ul>
+                `,
+                summary: "HTML bertindak sebagai tulang punggung atau kerangka utama dari setiap situs web di internet."
+            },
+            {
+                id: 2,
+                title: "Modul 2: Styling CSS3 & Utility",
+                category: "Desain Web",
+                icon: "fa-brands fa-css3-alt",
+                color: "from-blue-500/20 to-cyan-500/20",
+                description: "Menghias tata letak web dengan efek visual, CSS Grid, Flexbox, dan utilitas modern.",
+                content: `
+                    <p class="text-base sm:text-lg font-medium text-white/90">
+                        <strong>CSS (Cascading Style Sheets)</strong> digunakan untuk mengatur tampilan visual, tata letak, warna, font, dan responsivitas dari elemen HTML.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 my-4">
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                            <h5 class="font-bold text-yellow-300 text-xs uppercase mb-1">Flexbox</h5>
+                            <p class="text-xs text-white/70">Ideal untuk tata letak satu dimensi (baris atau kolom).</p>
+                        </div>
+                        <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+                            <h5 class="font-bold text-yellow-300 text-xs uppercase mb-1">CSS Grid</h5>
+                            <p class="text-xs text-white/70">Sangat baik untuk struktur kompleks dua dimensi (baris & kolom).</p>
+                        </div>
+                    </div>
+                    <p class="text-white/80">
+                        Dalam aplikasi web ini, kami juga memanfaatkan kelas Tailwind CSS untuk transisi warna yang halus dan efek kaca (*glassmorphism*) yang modern.
+                    </p>
+                `,
+                summary: "CSS mengubah tampilan HTML mentah menjadi antarmuka visual yang menawan dan responsif."
+            },
+            {
+                id: 3,
+                title: "Modul 3: Logika JavaScript ES6+",
+                category: "Pemrograman Web",
+                icon: "fa-brands fa-js",
+                color: "from-yellow-500/20 to-amber-500/20",
+                description: "Menambahkan interaktivitas dinamis, penanganan event, serta fungsi manipulasi DOM.",
+                content: `
+                    <p class="text-base sm:text-lg font-medium text-white/90">
+                        <strong>JavaScript</strong> adalah bahasa pemrograman yang memberikan hidup dan interaktivitas pada web.
+                    </p>
+                    <p class="text-white/80">
+                        Contoh fungsi sederhana yang digunakan pada aplikasi web ini untuk merubah warna background secara acak:
+                    </p>
+                    <div class="bg-black/40 p-4 rounded-xl border border-white/10 code-font text-xs sm:text-sm overflow-x-auto text-yellow-200">
+                        function getRandomColor() {<br>
+                        &nbsp;&nbsp;const hex = '0123456789ABCDEF';<br>
+                        &nbsp;&nbsp;let color = '#';<br>
+                        &nbsp;&nbsp;for (let i = 0; i &lt; 6; i++) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;color += hex[Math.floor(Math.random() * 16)];<br>
+                        &nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;return color;<br>
+                        }
+                    </div>
+                    <p class="text-white/80">
+                        Fitur penanganan kejadian (Event Listeners) memungkinkan interaksi mouse/touch secara real-time.
+                    </p>
+                `,
+                summary: "JavaScript bertanggung jawab atas aksi, simulasi, manipulasi DOM, dan logika interaktif."
+            },
+            {
+                id: 4,
+                title: "Modul 4: Integrasi & Aplikasi Web",
+                category: "Lanjutan",
+                icon: "fa-solid fa-cubes",
+                color: "from-purple-500/20 to-pink-500/20",
+                description: "Menggabungkan HTML, CSS, dan JS menjadi satu kesatuan aplikasi web yang utuh.",
+                content: `
+                    <p class="text-base sm:text-lg font-medium text-white/90">
+                        Integrasi web adalah tahap menyatukan komponen struktur (HTML), tampilan (CSS), dan logika (JS) menjadi produk yang berfungsi mulus.
+                    </p>
+                    <div class="p-4 bg-white/5 rounded-xl border border-white/10 space-y-2">
+                        <h5 class="font-bold text-emerald-300 text-sm">Poin Penting Integrasi:</h5>
+                        <ul class="list-disc list-inside text-xs sm:text-sm text-white/80 space-y-1">
+                            <li>Memastikan aplikasi bebas bugs dan responsif di semua perangkat.</li>
+                            <li>Mengoptimalkan performa dan kecepatan render UI.</li>
+                            <li>Memberikan instruksi pengguna yang jelas dan desain intuitif.</li>
+                        </ul>
+                    </div>
+                `,
+                summary: "Integrasi memadukan seluruh keahlian frontend untuk menciptakan pengalaman pengguna (UX) yang menarik."
+            }
+        ];
+
+        // State Variabel
+        let activeModuleIndex = 0;
+        const defaultColor = "#0F172A";
+
+        // Inisialisasi Aplikasi
+        window.addEventListener('DOMContentLoaded', () => {
+            renderModuleCards();
+            loadModuleContent(0);
+
+            // Listener Klik di Seluruh Layar
+            document.addEventListener('click', (e) => {
+                // Cegah pemicu jika mengklik tombol khusus agar tidak double-trigger
+                if (e.target.closest('button') || e.target.closest('a')) {
+                    return;
+                }
+                changeBackgroundColor();
+            });
+        });
+
+        // Render Kartu Modul di Sidebar
+        function renderModuleCards() {
+            const container = document.getElementById('module-list');
+            container.innerHTML = '';
+
+            modulesData.forEach((mod, index) => {
+                const isActive = index === activeModuleIndex;
+                const card = document.createElement('div');
+
+                card.className = `p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    isActive
+                        ? 'bg-white/20 border-white/40 shadow-xl scale-[1.02]'
+                        : 'bg-black/20 hover:bg-white/10 border-white/10 opacity-80 hover:opacity-100'
+                }`;
+
+                card.onclick = (e) => {
+                    e.stopPropagation(); // Biarkan handler ubah warna dijalankan
+                    selectModule(index);
+                    changeBackgroundColor();
+                };
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3.5">
+                        <div class="p-3 rounded-xl bg-gradient-to-br ${mod.color} border border-white/15 text-white text-lg">
+                            <i class="${mod.icon}"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-yellow-300">${mod.category}</span>
+                            <h3 class="text-sm font-bold text-white truncate">${mod.title}</h3>
+                            <p class="text-xs text-white/70 line-clamp-1 mt-0.5">${mod.description}</p>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            document.getElementById('module-count').innerText = `${modulesData.length} Modul`;
+        }
+
+        // Pilih Modul
+        function selectModule(index) {
+            activeModuleIndex = index;
+            renderModuleCards();
+            loadModuleContent(index);
+        }
+
+        // Muat Isian Modul Aktif
+        function loadModuleContent(index) {
+            const mod = modulesData[index];
+            document.getElementById('module-category').innerHTML = `<i class="${mod.icon}"></i> ${mod.category}`;
+            document.getElementById('module-title').innerText = mod.title;
+            document.getElementById('module-body').innerHTML = mod.content;
+            document.getElementById('module-summary').innerText = `"${mod.summary}"`;
+
+            // Indicator
+            document.getElementById('module-index-indicator').innerText = `${index + 1}/${modulesData.length}`;
+
+            // Button States
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').disabled = index === modulesData.length - 1;
+        }
+
+        // Navigasi Prev/Next
+        function navigateModule(direction, event) {
+            if (event) event.stopPropagation();
+            const newIndex = activeModuleIndex + direction;
+            if (newIndex >= 0 && newIndex < modulesData.length) {
+                selectModule(newIndex);
+                changeBackgroundColor();
+            }
+        }
+
+        // Fungsi Generator Warna Acak Hex
+        function getRandomHexColor() {
+            const hexChars = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += hexChars[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Ubah Warna Background
+        function changeBackgroundColor(event) {
+            if (event) event.stopPropagation();
+            const newColor = getRandomHexColor();
+            const body = document.getElementById('app-body');
+
+            body.style.backgroundColor = newColor;
+            document.getElementById('hex-code-display').innerText = newColor;
+        }
+
+        // Reset Warna ke Default
+        function resetBackgroundColor(event) {
+            if (event) event.stopPropagation();
+            const body = document.getElementById('app-body');
+
+            body.style.backgroundColor = defaultColor;
+            document.getElementById('hex-code-display').innerText = defaultColor;
+            showToast("Background berhasil di-reset ke warna awal", "fa-solid fa-rotate-left");
+        }
+
+        // Salin Kode Hex ke Clipboard
+        function copyHexCode(event) {
+            if (event) event.stopPropagation();
+            const hexCode = document.getElementById('hex-code-display').innerText;
+
+            // Fallback execCommand copy
+            const tempInput = document.createElement("input");
+            tempInput.value = hexCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            showToast(`Kode warna ${hexCode} disalin!`, "fa-regular fa-copy");
+        }
+
+        // Tampilkan Toast Notification
+        function showToast(message, iconClass = "fa-solid fa-circle-check") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            toastIcon.className = `${iconClass} text-emerald-400 text-lg`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
